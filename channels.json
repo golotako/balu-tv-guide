@@ -1,0 +1,1160 @@
+[
+  {
+    "id": "1and1.il",
+    "names": [
+      "1+1.il"
+    ]
+  },
+  {
+    "id": "5sportlive.il",
+    "names": [
+      "ספורט 5 שידור חי.il"
+    ]
+  },
+  {
+    "id": "9.il",
+    "names": [
+      "ערוץ 9 שידור חי.il"
+    ]
+  },
+  {
+    "id": "actionworld1.il",
+    "names": [
+      "ערוץ האקשן העולמי 1.il"
+    ]
+  },
+  {
+    "id": "actionworld2.il",
+    "names": [
+      "ערוץ האקשן העולמי 2.il"
+    ]
+  },
+  {
+    "id": "aljazeera.il",
+    "names": [
+      "אל ג'זירה.il"
+    ]
+  },
+  {
+    "id": "amusement.il",
+    "names": [
+      "ערוץ השעשועונים.il"
+    ]
+  },
+  {
+    "id": "animalplanet.il",
+    "names": [
+      "Animal Planet.il"
+    ]
+  },
+  {
+    "id": "aplus.il",
+    "names": [
+      "A Plus.il"
+    ]
+  },
+  {
+    "id": "arte.il",
+    "names": [
+      "ARTE.il"
+    ]
+  },
+  {
+    "id": "baby.il",
+    "names": [
+      "בייבי.il"
+    ]
+  },
+  {
+    "id": "bigbrother.il",
+    "names": [
+      "האח הגדול.il"
+    ]
+  },
+  {
+    "id": "bloomberg.il",
+    "names": [
+      "Bloomberg.il"
+    ]
+  },
+  {
+    "id": "bober.il",
+    "names": [
+      "BOBER.il"
+    ]
+  },
+  {
+    "id": "bollyshow.il",
+    "names": [
+      "BollyShow.il"
+    ]
+  },
+  {
+    "id": "carousel.il",
+    "names": [
+      "CAROUSEL.il"
+    ]
+  },
+  {
+    "id": "cctvnews.il",
+    "names": [
+      "CCTV NEWS.il"
+    ]
+  },
+  {
+    "id": "celcomactionmovies.il",
+    "names": [
+      "סלקום ACTION MOVIES.il"
+    ]
+  },
+  {
+    "id": "celcomcomedymovies.il",
+    "names": [
+      "סלקום COMEDY MOVIES.il"
+    ]
+  },
+  {
+    "id": "celcomdoco.il",
+    "names": [
+      "סלקום דוקו.il"
+    ]
+  },
+  {
+    "id": "celcomdramamovies.il",
+    "names": [
+      "סלקום DRAMA MOVIES.il"
+    ]
+  },
+  {
+    "id": "celcomfamilymovies.il",
+    "names": [
+      "סלקום FAMILY MOVIES.il"
+    ]
+  },
+  {
+    "id": "celcomkids.il",
+    "names": [
+      "סלקום קידס.il"
+    ]
+  },
+  {
+    "id": "celcomseries.il",
+    "names": [
+      "סלקום סדרות.il"
+    ]
+  },
+  {
+    "id": "cgtndocumentary.il",
+    "names": [
+      "CGTN DOCUMENTARY.il"
+    ]
+  },
+  {
+    "id": "channel11.il",
+    "names": [
+      "מכאן.il"
+    ]
+  },
+  {
+    "id": "channel12.il",
+    "names": [
+      "ערוץ 12.il"
+    ]
+  },
+  {
+    "id": "channel13.il",
+    "names": [
+      "ערוץ 13.il"
+    ]
+  },
+  {
+    "id": "channel14.il",
+    "names": [
+      "ערוץ 14.il"
+    ]
+  },
+  {
+    "id": "channel1rus.il",
+    "names": [
+      "CHANNEL 1 RUS.il"
+    ]
+  },
+  {
+    "id": "channel23education.il",
+    "names": [
+      "ערוץ 23 חינוכית.il"
+    ]
+  },
+  {
+    "id": "channel3.il",
+    "names": [
+      "ערוץ 3 שידור חי.il"
+    ]
+  },
+  {
+    "id": "channel8.il",
+    "names": [
+      "ערוץ 8 שידור חי.il"
+    ]
+  },
+  {
+    "id": "channel9.il",
+    "names": [
+      "ערוץ 9.il"
+    ]
+  },
+  {
+    "id": "childhood.il",
+    "names": [
+      "ילדותי.il"
+    ]
+  },
+  {
+    "id": "childhoodsongs.il",
+    "names": [
+      "שירי ילדותי.il"
+    ]
+  },
+  {
+    "id": "classica.il",
+    "names": [
+      "CLASSICA.il"
+    ]
+  },
+  {
+    "id": "classiccomedies.il",
+    "names": [
+      "ערוץ הקומדיות הקלאסיות.il"
+    ]
+  },
+  {
+    "id": "cnn.il",
+    "names": [
+      "CNN.il"
+    ]
+  },
+  {
+    "id": "ctc.il",
+    "names": [
+      "CTC.il"
+    ]
+  },
+  {
+    "id": "daystar.il",
+    "names": [
+      "DAYSTAR.il"
+    ]
+  },
+  {
+    "id": "discovery.il",
+    "names": [
+      "דיסקברי HD.il"
+    ]
+  },
+  {
+    "id": "disney.il",
+    "names": [
+      "דיסני.il"
+    ]
+  },
+  {
+    "id": "disneyjunior.il",
+    "names": [
+      "דיסני ג'וניור.il"
+    ]
+  },
+  {
+    "id": "doctor.il",
+    "names": [
+      "ערוץ דוק.il"
+    ]
+  },
+  {
+    "id": "domikino.il",
+    "names": [
+      "DOM KINO.il"
+    ]
+  },
+  {
+    "id": "dramaindia1.il",
+    "names": [
+      "ערוץ הדרמות ההודיות 1.il"
+    ]
+  },
+  {
+    "id": "dramaindia2.il",
+    "names": [
+      "ערוץ הדרמות ההודיות 2.il"
+    ]
+  },
+  {
+    "id": "dramaspain1.il",
+    "names": [
+      "ערוץ הדרמות הספרדיות 1.il"
+    ]
+  },
+  {
+    "id": "dramaspain2.il",
+    "names": [
+      "ערוץ הדרמות הספרדיות  2.il"
+    ]
+  },
+  {
+    "id": "dramaturkey2.il",
+    "names": [
+      "ערוץ הדרמות הטורקיות 2.il"
+    ]
+  },
+  {
+    "id": "dramaturkey3.il",
+    "names": [
+      "ערוץ הדרמות הטורקיות 3.il"
+    ]
+  },
+  {
+    "id": "dramaturkeyplus.il",
+    "names": [
+      "ערוץ הדרמות הטורקיות+.il"
+    ]
+  },
+  {
+    "id": "dwenglish.il",
+    "names": [
+      "DW English HD.il"
+    ]
+  },
+  {
+    "id": "dwrussian.il",
+    "names": [
+      "DW רוסית.il"
+    ]
+  },
+  {
+    "id": "eentertainment.il",
+    "names": [
+      "ערוץ הבידור E.il"
+    ]
+  },
+  {
+    "id": "ego.il",
+    "names": [
+      "ערוץ אגו.il"
+    ]
+  },
+  {
+    "id": "egolive.il",
+    "names": [
+      "ערוץ אגו שידור חי.il"
+    ]
+  },
+  {
+    "id": "eurosport1.il",
+    "names": [
+      "Eurosport.il"
+    ]
+  },
+  {
+    "id": "eurosport2.il",
+    "names": [
+      "EUROSPORT 2.il"
+    ]
+  },
+  {
+    "id": "eurostar.il",
+    "names": [
+      "Eurostar.il"
+    ]
+  },
+  {
+    "id": "fashiontv.il",
+    "names": [
+      "ערוץ האופנה FTV שידור חי.il"
+    ]
+  },
+  {
+    "id": "finance.il",
+    "names": [
+      "ערוץ הכלכלה.il"
+    ]
+  },
+  {
+    "id": "fomo.il",
+    "names": [
+      "FOMO.il"
+    ]
+  },
+  {
+    "id": "foodchannel.il",
+    "names": [
+      "ערוץ האוכל.il"
+    ]
+  },
+  {
+    "id": "foodnetwork.il",
+    "names": [
+      "FOOD NETWORK.il"
+    ]
+  },
+  {
+    "id": "foody.il",
+    "names": [
+      "FOODY.il"
+    ]
+  },
+  {
+    "id": "foxnews.il",
+    "names": [
+      "FOX NEWS.il"
+    ]
+  },
+  {
+    "id": "france2.il",
+    "names": [
+      "FRANCE2.il"
+    ]
+  },
+  {
+    "id": "france24.il",
+    "names": [
+      "FRANCE 24.il"
+    ]
+  },
+  {
+    "id": "france3.il",
+    "names": [
+      "FRANCE 3.il"
+    ]
+  },
+  {
+    "id": "freetv10stars.il",
+    "names": [
+      "FreeTV 10 STARS סרטים.il"
+    ]
+  },
+  {
+    "id": "freetvcomedymovies.il",
+    "names": [
+      "FreeTV סרטים קומדיה.il"
+    ]
+  },
+  {
+    "id": "freetvcomedyseries.il",
+    "names": [
+      "FreeTV סדרות קומדיה.il"
+    ]
+  },
+  {
+    "id": "freetvdoco.il",
+    "names": [
+      "FreeTV דוקו.il"
+    ]
+  },
+  {
+    "id": "freetvdramamovies.il",
+    "names": [
+      "FreeTV סרטים דרמה.il"
+    ]
+  },
+  {
+    "id": "freetvdramaseries.il",
+    "names": [
+      "FreeTV סדרות דרמה.il"
+    ]
+  },
+  {
+    "id": "freetvfactionmovies.il",
+    "names": [
+      "FreeTV סרטים פעולה.il"
+    ]
+  },
+  {
+    "id": "freetvfamilymovies.il",
+    "names": [
+      "FreeTV סרטים משפחה.il"
+    ]
+  },
+  {
+    "id": "freetvfeelgoodmovies.il",
+    "names": [
+      "FreeTV סרטים פיל גוד.il"
+    ]
+  },
+  {
+    "id": "freetvfood.il",
+    "names": [
+      "FreeTV אוכל.il"
+    ]
+  },
+  {
+    "id": "freetvglobal.il",
+    "names": [
+      "FreeTV גלובל.il"
+    ]
+  },
+  {
+    "id": "freetvhorrormovies.il",
+    "names": [
+      "FreeTV סרטים אימה.il"
+    ]
+  },
+  {
+    "id": "freetvisraelimovies.il",
+    "names": [
+      "FreeTV סרטים ישראלי.il"
+    ]
+  },
+  {
+    "id": "freetvlifestyle.il",
+    "names": [
+      "FreeTV לייף סטייל.il"
+    ]
+  },
+  {
+    "id": "freetvromancemovies.il",
+    "names": [
+      "FreeTV סרטים רומנטי.il"
+    ]
+  },
+  {
+    "id": "freetvsuspensemovies.il",
+    "names": [
+      "FreeTV סרטים מתח.il"
+    ]
+  },
+  {
+    "id": "goodlifeplus.il",
+    "names": [
+      "GOOD LIFE+.il"
+    ]
+  },
+  {
+    "id": "greatcountry.il",
+    "names": [
+      "ערוץ ארץ נהדרת.il"
+    ]
+  },
+  {
+    "id": "hidabrot.il",
+    "names": [
+      "IL - ערוץ הידברות.il"
+    ]
+  },
+  {
+    "id": "history.il",
+    "names": [
+      "היסטוריה.il"
+    ]
+  },
+  {
+    "id": "homeplus.il",
+    "names": [
+      "בית+.il"
+    ]
+  },
+  {
+    "id": "hot3.il",
+    "names": [
+      "HOT 3.il"
+    ]
+  },
+  {
+    "id": "hot8.il",
+    "names": [
+      "HOT 8.il"
+    ]
+  },
+  {
+    "id": "hotcinema1.il",
+    "names": [
+      "HOT Cinema 1.il"
+    ]
+  },
+  {
+    "id": "hotcinema2.il",
+    "names": [
+      "HOT Cinema 2.il"
+    ]
+  },
+  {
+    "id": "hotcinema3.il",
+    "names": [
+      "HOT Cinema 3.il"
+    ]
+  },
+  {
+    "id": "hotcinema4.il",
+    "names": [
+      "HOT Cinema 4.il"
+    ]
+  },
+  {
+    "id": "hotcomedycentral.il",
+    "names": [
+      "HOT Comedy Central.il"
+    ]
+  },
+  {
+    "id": "hotentertainment.il",
+    "names": [
+      "HOT Entertainment.il"
+    ]
+  },
+  {
+    "id": "hothbo.il",
+    "names": [
+      "HOT HBO.il"
+    ]
+  },
+  {
+    "id": "hotisraelentertainment.il",
+    "names": [
+      "הוט בידור ישראלי.il"
+    ]
+  },
+  {
+    "id": "hotluli.il",
+    "names": [
+      "HOT Luli.il"
+    ]
+  },
+  {
+    "id": "hotzone.il",
+    "names": [
+      "HOT Zone.il"
+    ]
+  },
+  {
+    "id": "humour.il",
+    "names": [
+      "ערוץ ההומור.il"
+    ]
+  },
+  {
+    "id": "i24english.il",
+    "names": [
+      "I24 English.il"
+    ]
+  },
+  {
+    "id": "i24french.il",
+    "names": [
+      "I24 French.il"
+    ]
+  },
+  {
+    "id": "i24hebrew.il",
+    "names": [
+      "I24 עברית.il"
+    ]
+  },
+  {
+    "id": "i24newsarabic.il",
+    "names": [
+      "I24NEWS ARABIC.il"
+    ]
+  },
+  {
+    "id": "ietv.il",
+    "names": [
+      "I.E.T.V..il"
+    ]
+  },
+  {
+    "id": "investigationdiscovery.il",
+    "names": [
+      "Investigation Discovery.il"
+    ]
+  },
+  {
+    "id": "israelcinema.il",
+    "names": [
+      "ערוץ הקולנוע הישראלי.il"
+    ]
+  },
+  {
+    "id": "jimjam.il",
+    "names": [
+      "Jim Jam.il"
+    ]
+  },
+  {
+    "id": "jimjamrus.il",
+    "names": [
+      "Jim Jam RUS.il"
+    ]
+  },
+  {
+    "id": "junior.il",
+    "names": [
+      "Junior.il"
+    ]
+  },
+  {
+    "id": "kaneducation.il",
+    "names": [
+      "חינוכית.il"
+    ]
+  },
+  {
+    "id": "kids.il",
+    "names": [
+      "ערוץ הילדים.il"
+    ]
+  },
+  {
+    "id": "kiryoki.il",
+    "names": [
+      "ערוץ הקריוקי.il"
+    ]
+  },
+  {
+    "id": "knesset.il",
+    "names": [
+      "IL - ערוץ הכנסת.il"
+    ]
+  },
+  {
+    "id": "logi.il",
+    "names": [
+      "לוגי.il"
+    ]
+  },
+  {
+    "id": "mediaset.il",
+    "names": [
+      "Mediaset.il"
+    ]
+  },
+  {
+    "id": "metv.il",
+    "names": [
+      "METV.il"
+    ]
+  },
+  {
+    "id": "mtv.il",
+    "names": [
+      "MTV.il"
+    ]
+  },
+  {
+    "id": "mtvhits.il",
+    "names": [
+      "MTV HITS.il"
+    ]
+  },
+  {
+    "id": "music.il",
+    "names": [
+      "Music IL.il"
+    ]
+  },
+  {
+    "id": "music24.il",
+    "names": [
+      "Music 24.il"
+    ]
+  },
+  {
+    "id": "nationalgeographic.il",
+    "names": [
+      "National Geographic.il"
+    ]
+  },
+  {
+    "id": "newsmax.il",
+    "names": [
+      "NEWSMAX.il"
+    ]
+  },
+  {
+    "id": "ngwild.il",
+    "names": [
+      "NG WILD.il"
+    ]
+  },
+  {
+    "id": "nickolideon.il",
+    "names": [
+      "ניקלודיאון.il"
+    ]
+  },
+  {
+    "id": "nickolideonlive.il",
+    "names": [
+      "ניקלודיאון שידור חי.il"
+    ]
+  },
+  {
+    "id": "norfesh.il",
+    "names": [
+      "ערוץ הנופש.il"
+    ]
+  },
+  {
+    "id": "nsshekino.il",
+    "names": [
+      "NASHE KINO.il"
+    ]
+  },
+  {
+    "id": "ntvmir.il",
+    "names": [
+      "NTV MIR.il"
+    ]
+  },
+  {
+    "id": "one.il",
+    "names": [
+      "ONE.il"
+    ]
+  },
+  {
+    "id": "one1.il",
+    "names": [
+      "ONE 1.il"
+    ]
+  },
+  {
+    "id": "one2.il",
+    "names": [
+      "ONE 2.il"
+    ]
+  },
+  {
+    "id": "onedoco.il",
+    "names": [
+      "One Doco.il"
+    ]
+  },
+  {
+    "id": "oneedge.il",
+    "names": [
+      "One Edge.il"
+    ]
+  },
+  {
+    "id": "protvinternational.il",
+    "names": [
+      "PROTV INTERNATIONAL.il"
+    ]
+  },
+  {
+    "id": "reality.il",
+    "names": [
+      "IL - ערוץ הריאליטי.il"
+    ]
+  },
+  {
+    "id": "rentv.il",
+    "names": [
+      "REN TV.il"
+    ]
+  },
+  {
+    "id": "rtl.il",
+    "names": [
+      "RTL.il"
+    ]
+  },
+  {
+    "id": "rtm.il",
+    "names": [
+      "RTM.il"
+    ]
+  },
+  {
+    "id": "rtrplaneta.il",
+    "names": [
+      "RTR PLANETA.il"
+    ]
+  },
+  {
+    "id": "russianmusicbox.il",
+    "names": [
+      "Russian Music Box.il"
+    ]
+  },
+  {
+    "id": "sabrimaranan.il",
+    "names": [
+      "ערוץ סברי מרנן.il"
+    ]
+  },
+  {
+    "id": "shansontv.il",
+    "names": [
+      "SHANSON TV.il"
+    ]
+  },
+  {
+    "id": "skynews.il",
+    "names": [
+      "SKY NEWS.il"
+    ]
+  },
+  {
+    "id": "sport1.il",
+    "names": [
+      "ספורט 1 HD.il"
+    ]
+  },
+  {
+    "id": "sport2.il",
+    "names": [
+      "ספורט 2.il"
+    ]
+  },
+  {
+    "id": "sport3.il",
+    "names": [
+      "ספורט 3 HD.il"
+    ]
+  },
+  {
+    "id": "sport4.il",
+    "names": [
+      "ספורט 4.il"
+    ]
+  },
+  {
+    "id": "sport5.il",
+    "names": [
+      "SPORT5.il"
+    ]
+  },
+  {
+    "id": "sport54k.il",
+    "names": [
+      "SPORT 5 4K.il"
+    ]
+  },
+  {
+    "id": "sport5gold.il",
+    "names": [
+      "SPORT 5 GOLD.il"
+    ]
+  },
+  {
+    "id": "sport5hd.il",
+    "names": [
+      "SPORT 5 HD.il"
+    ]
+  },
+  {
+    "id": "sport5live.il",
+    "names": [
+      "SPORT 5 LIVE.il"
+    ]
+  },
+  {
+    "id": "sport5plus.il",
+    "names": [
+      "SPORT 5 PLUS HD.il"
+    ]
+  },
+  {
+    "id": "sport5stars.il",
+    "names": [
+      "SPORT 5 STARS.il"
+    ]
+  },
+  {
+    "id": "sportedge.il",
+    "names": [
+      "SPORT EDGE.il"
+    ]
+  },
+  {
+    "id": "stars.il",
+    "names": [
+      "ערוץ הכוכבים.il"
+    ]
+  },
+  {
+    "id": "teennick.il",
+    "names": [
+      "ערוץ טין ניק.il"
+    ]
+  },
+  {
+    "id": "telecafe.il",
+    "names": [
+      "Telecafe.il"
+    ]
+  },
+  {
+    "id": "tlc.il",
+    "names": [
+      "TLC.il"
+    ]
+  },
+  {
+    "id": "travel.il",
+    "names": [
+      "IL - ערוץ הטיולים.il"
+    ]
+  },
+  {
+    "id": "travelplus.il",
+    "names": [
+      "TRAVEL+.il"
+    ]
+  },
+  {
+    "id": "tvci.il",
+    "names": [
+      "TVCI.il"
+    ]
+  },
+  {
+    "id": "tve.il",
+    "names": [
+      "TVE.il"
+    ]
+  },
+  {
+    "id": "vamos.il",
+    "names": [
+      "וואמוס.il"
+    ]
+  },
+  {
+    "id": "viva.il",
+    "names": [
+      "IL - ויוה.il"
+    ]
+  },
+  {
+    "id": "vivainstanbul.il",
+    "names": [
+      "ויוה איסטנבול.il"
+    ]
+  },
+  {
+    "id": "vivalive.il",
+    "names": [
+      "ערוץ ויוה שידור חי.il"
+    ]
+  },
+  {
+    "id": "vivapremium.il",
+    "names": [
+      "Viva Premium.il"
+    ]
+  },
+  {
+    "id": "vivatelanovela.il",
+    "names": [
+      "ויוה טלנובלות.il"
+    ]
+  },
+  {
+    "id": "vivavintage.il",
+    "names": [
+      "ויוה וינטג.il"
+    ]
+  },
+  {
+    "id": "vremya.il",
+    "names": [
+      "Vremya.il"
+    ]
+  },
+  {
+    "id": "wonder.il",
+    "names": [
+      "פלא.il"
+    ]
+  },
+  {
+    "id": "yamtichoni.il",
+    "names": [
+      "ים תיכוני.il"
+    ]
+  },
+  {
+    "id": "yamtichoni2.il",
+    "names": [
+      "ים תיכוני 2.il"
+    ]
+  },
+  {
+    "id": "yamtichoniplus.il",
+    "names": [
+      "הערוץ הים תיכוני + .il"
+    ]
+  },
+  {
+    "id": "yesbollywood.il",
+    "names": [
+      "YesBollywood.il"
+    ]
+  },
+  {
+    "id": "yesmoviesaction.il",
+    "names": [
+      "Yes MOVIES ACTION.il"
+    ]
+  },
+  {
+    "id": "yesmoviescomedy.il",
+    "names": [
+      "Yes MOVIES COMEDY.il"
+    ]
+  },
+  {
+    "id": "yesmoviesdrama.il",
+    "names": [
+      "Yes MOVIES DRAMA.il"
+    ]
+  },
+  {
+    "id": "yesmovieskids.il",
+    "names": [
+      "Yes MOVIES KIDS.il"
+    ]
+  },
+  {
+    "id": "yestvaction.il",
+    "names": [
+      "Yes TV ACTION.il"
+    ]
+  },
+  {
+    "id": "yestvcomedy.il",
+    "names": [
+      "Yes TV COMEDY.il"
+    ]
+  },
+  {
+    "id": "yestvdrama.il",
+    "names": [
+      "Yes TV DRAMA.il"
+    ]
+  },
+  {
+    "id": "yoyo.il",
+    "names": [
+      "יויו.il"
+    ]
+  },
+  {
+    "id": "zeetv.il",
+    "names": [
+      "ZEE TV.il"
+    ]
+  },
+  {
+    "id": "zoom.il",
+    "names": [
+      "Zoom.il"
+    ]
+  },
+  {
+    "id": "zoomtoon.il",
+    "names": [
+      "ZOOM Toon.il"
+    ]
+  }
+]
