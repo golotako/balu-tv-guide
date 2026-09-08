@@ -34,7 +34,10 @@ PORT = int(os.environ.get("PORT", "10000"))
 
 WEBHOOK_PATH = "/telegram"
 
-RENDER_EXTERNAL_URL = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+RENDER_EXTERNAL_URL = os.environ.get(
+    "RENDER_EXTERNAL_URL",
+    ""
+).rstrip("/")
 
 ISRAEL_TZ = ZoneInfo("Asia/Jerusalem")
 
@@ -96,21 +99,42 @@ def normalize_text(text):
     if not text:
         return ""
 
-    text = unicodedata.normalize("NFKC", str(text))
+    text = unicodedata.normalize(
+        "NFKC",
+        str(text),
+    )
+
     text = text.lower().strip()
 
-    text = re.sub(r"[-_/_.]+", " ", text)
+    text = re.sub(
+        r"[-_/_.]+",
+        " ",
+        text,
+    )
 
     # Keep Hebrew, English, numbers and +
-    text = re.sub(r"[^\w\u0590-\u05FF+ ]+", " ", text)
+    text = re.sub(
+        r"[^\w\u0590-\u05FF+ ]+",
+        " ",
+        text,
+    )
 
-    text = re.sub(r"\s+", " ", text)
+    text = re.sub(
+        r"\s+",
+        " ",
+        text,
+    )
 
     return text.strip()
 
 
 def extract_numbers(text):
-    return set(re.findall(r"\d+", normalize_text(text)))
+    return set(
+        re.findall(
+            r"\d+",
+            normalize_text(text),
+        )
+    )
 
 
 # ============================================================
@@ -133,8 +157,13 @@ def parse_epg_datetime(value):
     ]
 
     for fmt in formats:
+
         try:
-            return datetime.strptime(value, fmt)
+            return datetime.strptime(
+                value,
+                fmt,
+            )
+
         except ValueError:
             pass
 
@@ -142,13 +171,18 @@ def parse_epg_datetime(value):
 
 
 def to_israel_time(dt):
+
     if dt is None:
         return None
 
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(
+            tzinfo=timezone.utc
+        )
 
-    return dt.astimezone(ISRAEL_TZ)
+    return dt.astimezone(
+        ISRAEL_TZ
+    )
 
 
 # ============================================================
@@ -175,41 +209,86 @@ def build_epg_index(root):
     # --------------------------------------------------------
 
     for channel in root.findall("channel"):
+
         channel_id = channel.get("id")
 
         if not channel_id:
             continue
 
-        display_name_element = channel.find("display-name")
+        display_name_element = channel.find(
+            "display-name"
+        )
 
         if display_name_element is not None:
-            display_name = display_name_element.text or channel_id
+            display_name = (
+                display_name_element.text
+                or channel_id
+            )
         else:
             display_name = channel_id
 
-        normalized_name = normalize_text(display_name)
+        normalized_name = normalize_text(
+            display_name
+        )
 
         channel_data = {
             "id": channel_id,
             "name": display_name,
             "normalized_name": normalized_name,
-            "numbers": extract_numbers(display_name),
+            "numbers": extract_numbers(
+                display_name
+            ),
         }
 
-        CHANNELS_CACHE.append(channel_data)
-        CHANNEL_BY_ID[channel_id] = channel_data
+        CHANNELS_CACHE.append(
+            channel_data
+        )
+
+        CHANNEL_BY_ID[channel_id] = (
+            channel_data
+        )
 
     # --------------------------------------------------------
     # Aliases
     # --------------------------------------------------------
+    #
+    # channels.json is expected to be:
+    #
+    # [
+    #   {
+    #     "id": "channel12.il",
+    #     "names": [
+    #       "12",
+    #       "ערוץ 12",
+    #       "קשת"
+    #     ]
+    #   }
+    # ]
+    #
+    # --------------------------------------------------------
 
-    for channel_id, aliases in CHANNEL_ALIASES.items():
+    for channel_entry in CHANNEL_ALIASES:
+
+        channel_id = channel_entry.get(
+            "id"
+        )
+
+        aliases = channel_entry.get(
+            "names",
+            []
+        )
+
+        if not channel_id:
+            continue
 
         if channel_id not in CHANNEL_BY_ID:
             continue
 
         for alias in aliases:
-            normalized_alias = normalize_text(alias)
+
+            normalized_alias = normalize_text(
+                alias
+            )
 
             if not normalized_alias:
                 continue
@@ -217,34 +296,56 @@ def build_epg_index(root):
             ALIAS_TO_CHANNEL_IDS.setdefault(
                 normalized_alias,
                 []
-            ).append(channel_id)
+            ).append(
+                channel_id
+            )
 
     # --------------------------------------------------------
     # Programs
     # --------------------------------------------------------
 
-    for programme in root.findall("programme"):
+    for programme in root.findall(
+        "programme"
+    ):
 
-        channel_id = programme.get("channel")
+        channel_id = programme.get(
+            "channel"
+        )
 
         if not channel_id:
             continue
 
-        start = parse_epg_datetime(programme.get("start"))
-        stop = parse_epg_datetime(programme.get("stop"))
+        start = parse_epg_datetime(
+            programme.get("start")
+        )
 
-        title_element = programme.find("title")
-        desc_element = programme.find("desc")
+        stop = parse_epg_datetime(
+            programme.get("stop")
+        )
+
+        title_element = programme.find(
+            "title"
+        )
+
+        desc_element = programme.find(
+            "desc"
+        )
 
         title = (
             title_element.text.strip()
-            if title_element is not None and title_element.text
+            if (
+                title_element is not None
+                and title_element.text
+            )
             else "ללא שם"
         )
 
         description = (
             desc_element.text.strip()
-            if desc_element is not None and desc_element.text
+            if (
+                desc_element is not None
+                and desc_element.text
+            )
             else ""
         )
 
@@ -258,15 +359,22 @@ def build_epg_index(root):
         PROGRAMS_BY_CHANNEL.setdefault(
             channel_id,
             []
-        ).append(program_data)
+        ).append(
+            program_data
+        )
 
     # --------------------------------------------------------
     # Sort programs
     # --------------------------------------------------------
 
     for channel_id in PROGRAMS_BY_CHANNEL:
-        PROGRAMS_BY_CHANNEL[channel_id].sort(
-            key=lambda program: program["start"] or datetime.min.replace(
+
+        PROGRAMS_BY_CHANNEL[
+            channel_id
+        ].sort(
+            key=lambda program:
+            program["start"]
+            or datetime.min.replace(
                 tzinfo=timezone.utc
             )
         )
@@ -285,19 +393,27 @@ def build_epg_index(root):
 
 def load_epg(force=False):
     """
-    Download EPG only when cache is empty or older than 48 hours.
+    Download EPG only when cache is empty
+    or older than 48 hours.
     """
 
     global EPG_ROOT
     global EPG_LAST_UPDATE
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(
+        timezone.utc
+    )
 
     if (
         not force
         and EPG_ROOT is not None
         and EPG_LAST_UPDATE is not None
-        and now - EPG_LAST_UPDATE < timedelta(hours=EPG_CACHE_HOURS)
+        and (
+            now - EPG_LAST_UPDATE
+            < timedelta(
+                hours=EPG_CACHE_HOURS
+            )
+        )
     ):
         return EPG_ROOT
 
@@ -310,14 +426,18 @@ def load_epg(force=False):
 
     response.raise_for_status()
 
-    root = ET.fromstring(response.content)
+    root = ET.fromstring(
+        response.content
+    )
 
     build_epg_index(root)
 
     EPG_ROOT = root
     EPG_LAST_UPDATE = now
 
-    print("EPG loaded successfully")
+    print(
+        "EPG loaded successfully"
+    )
 
     return EPG_ROOT
 
@@ -332,7 +452,9 @@ def find_channels(search_text):
     partial names and fuzzy matching.
     """
 
-    query = normalize_text(search_text)
+    query = normalize_text(
+        search_text
+    )
 
     if not query:
         return []
@@ -341,9 +463,12 @@ def find_channels(search_text):
     # Exact alias
     # --------------------------------------------------------
 
-    exact_ids = ALIAS_TO_CHANNEL_IDS.get(query)
+    exact_ids = ALIAS_TO_CHANNEL_IDS.get(
+        query
+    )
 
     if exact_ids:
+
         return [
             CHANNEL_BY_ID[channel_id]
             for channel_id in exact_ids
@@ -354,41 +479,68 @@ def find_channels(search_text):
     # Search
     # --------------------------------------------------------
 
-    query_numbers = extract_numbers(query)
+    query_numbers = extract_numbers(
+        query
+    )
 
     results = []
 
     for channel in CHANNELS_CACHE:
 
-        name = channel["normalized_name"]
+        name = channel[
+            "normalized_name"
+        ]
 
         score = 0
 
         # Exact name
         if query == name:
+
             score = 100
 
         # Query contained in name
         elif query in name:
+
             score = 90
 
         # Name contained in query
         elif name in query:
+
             score = 85
 
         else:
-            query_words = set(query.split())
-            name_words = set(name.split())
+
+            query_words = set(
+                query.split()
+            )
+
+            name_words = set(
+                name.split()
+            )
 
             # Word overlap
-            if query_words and query_words.intersection(name_words):
-                score = max(score, 75)
+            if (
+                query_words
+                and query_words.intersection(
+                    name_words
+                )
+            ):
+                score = max(
+                    score,
+                    75,
+                )
 
             # Number match
-            if query_numbers and query_numbers.intersection(
-                channel["numbers"]
+            if (
+                query_numbers
+                and query_numbers.intersection(
+                    channel["numbers"]
+                )
             ):
-                score = max(score, 80)
+                score = max(
+                    score,
+                    80,
+                )
 
             # Fuzzy match
             fuzzy_score = SequenceMatcher(
@@ -398,9 +550,16 @@ def find_channels(search_text):
             ).ratio()
 
             if fuzzy_score >= 0.55:
-                score = max(score, int(fuzzy_score * 70))
+
+                score = max(
+                    score,
+                    int(
+                        fuzzy_score * 70
+                    ),
+                )
 
         if score > 0:
+
             results.append(
                 (
                     score,
@@ -423,8 +582,14 @@ def find_channels(search_text):
 # PROGRAM SEARCH
 # ============================================================
 
-def search_programs(channel_id, search_text):
-    query = normalize_text(search_text)
+def search_programs(
+    channel_id,
+    search_text,
+):
+
+    query = normalize_text(
+        search_text
+    )
 
     if not query:
         return []
@@ -448,12 +613,15 @@ def search_programs(channel_id, search_text):
         score = 0
 
         if query == title:
+
             score = 100
 
         elif query in title:
+
             score = 90
 
         else:
+
             fuzzy_score = SequenceMatcher(
                 None,
                 query,
@@ -461,9 +629,13 @@ def search_programs(channel_id, search_text):
             ).ratio()
 
             if fuzzy_score >= 0.45:
-                score = int(fuzzy_score * 80)
+
+                score = int(
+                    fuzzy_score * 80
+                )
 
         if score > 0:
+
             results.append(
                 (
                     score,
@@ -486,10 +658,17 @@ def search_programs(channel_id, search_text):
 # PROGRAM FILTERS
 # ============================================================
 
-def get_last_48_hours(channel_id):
-    now = datetime.now(timezone.utc)
+def get_last_48_hours(
+    channel_id
+):
 
-    start_time = now - timedelta(hours=48)
+    now = datetime.now(
+        timezone.utc
+    )
+
+    start_time = (
+        now - timedelta(hours=48)
+    )
 
     programs = PROGRAMS_BY_CHANNEL.get(
         channel_id,
@@ -501,15 +680,22 @@ def get_last_48_hours(channel_id):
         for program in programs
         if (
             program["stop"] is not None
-            and program["stop"] >= start_time
+            and program["stop"]
+            >= start_time
             and program["start"] is not None
-            and program["start"] <= now
+            and program["start"]
+            <= now
         )
     ]
 
 
-def get_current_program(channel_id):
-    now = datetime.now(timezone.utc)
+def get_current_program(
+    channel_id
+):
+
+    now = datetime.now(
+        timezone.utc
+    )
 
     programs = PROGRAMS_BY_CHANNEL.get(
         channel_id,
@@ -524,8 +710,12 @@ def get_current_program(channel_id):
         if not start:
             continue
 
-        if start <= now and (
-            stop is None or now < stop
+        if (
+            start <= now
+            and (
+                stop is None
+                or now < stop
+            )
         ):
             return program
 
@@ -536,25 +726,51 @@ def get_current_program(channel_id):
 # FORMATTING
 # ============================================================
 
-def format_program(program):
-    start = to_israel_time(program["start"])
-    stop = to_israel_time(program["stop"])
+def format_program(
+    program
+):
+
+    start = to_israel_time(
+        program["start"]
+    )
+
+    stop = to_israel_time(
+        program["stop"]
+    )
 
     if start:
-        start_text = start.strftime("%d/%m %H:%M")
+
+        start_text = start.strftime(
+            "%d/%m %H:%M"
+        )
+
     else:
+
         start_text = "?"
 
     if stop:
-        stop_text = stop.strftime("%H:%M")
+
+        stop_text = stop.strftime(
+            "%H:%M"
+        )
+
     else:
+
         stop_text = "?"
 
-    text = f"📺 {program['title']}\n"
-    text += f"🕐 {start_text} - {stop_text}"
+    text = (
+        f"📺 {program['title']}\n"
+    )
+
+    text += (
+        f"🕐 {start_text} - {stop_text}"
+    )
 
     if program["description"]:
-        text += f"\n{program['description']}"
+
+        text += (
+            f"\n{program['description']}"
+        )
 
     return text
 
@@ -564,6 +780,7 @@ def format_program(program):
 # ============================================================
 
 def channel_keyboard():
+
     return InlineKeyboardMarkup(
         [
             [
@@ -591,6 +808,7 @@ def channel_keyboard():
 
 
 def program_keyboard():
+
     return InlineKeyboardMarkup(
         [
             [
@@ -613,12 +831,20 @@ def program_keyboard():
 # COMMANDS
 # ============================================================
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def start(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
 
     reset_state(context)
 
-    state = get_user_state(context)
-    state["searching_channel"] = True
+    state = get_user_state(
+        context
+    )
+
+    state[
+        "searching_channel"
+    ] = True
 
     await update.message.reply_text(
         "📺 ברוכים הבאים!\n\n"
@@ -642,26 +868,41 @@ async def handle_channel_search(
     context,
     text,
 ):
+
     load_epg()
 
-    matches = find_channels(text)
+    matches = find_channels(
+        text
+    )
 
     if not matches:
+
         await update.message.reply_text(
             "❌ לא מצאתי ערוץ מתאים.\n\n"
             "נסה שם אחר או מספר ערוץ."
         )
+
         return
 
     if len(matches) == 1:
 
         channel = matches[0]
 
-        state = get_user_state(context)
+        state = get_user_state(
+            context
+        )
 
-        state["searching_channel"] = False
-        state["searching_program"] = False
-        state["selected_channel_id"] = channel["id"]
+        state[
+            "searching_channel"
+        ] = False
+
+        state[
+            "searching_program"
+        ] = False
+
+        state[
+            "selected_channel_id"
+        ] = channel["id"]
 
         await update.message.reply_text(
             f"📺 {channel['name']}\n\n"
@@ -679,14 +920,19 @@ async def handle_channel_search(
             [
                 InlineKeyboardButton(
                     channel["name"],
-                    callback_data=f"channel:{channel['id']}",
+                    callback_data=(
+                        f"channel:"
+                        f"{channel['id']}"
+                    ),
                 )
             ]
         )
 
     await update.message.reply_text(
         "מצאתי כמה ערוצים. בחר:",
-        reply_markup=InlineKeyboardMarkup(keyboard),
+        reply_markup=InlineKeyboardMarkup(
+            keyboard
+        ),
     )
 
 
@@ -699,19 +945,29 @@ async def handle_program_search(
     context,
     text,
 ):
-    state = get_user_state(context)
+
+    state = get_user_state(
+        context
+    )
 
     channel_id = state.get(
         "selected_channel_id"
     )
 
     if not channel_id:
-        state["searching_program"] = False
-        state["searching_channel"] = True
+
+        state[
+            "searching_program"
+        ] = False
+
+        state[
+            "searching_channel"
+        ] = True
 
         await update.message.reply_text(
             "📺 קודם בחר ערוץ."
         )
+
         return
 
     load_epg()
@@ -722,30 +978,45 @@ async def handle_program_search(
     )
 
     if not results:
+
         await update.message.reply_text(
-            "❌ לא מצאתי תוכנית מתאימה בערוץ הזה.\n\n"
+            "❌ לא מצאתי תוכנית מתאימה "
+            "בערוץ הזה.\n\n"
             "נסה לחפש לפי שם התוכנית."
         )
+
         return
 
-    state["searching_program"] = False
+    state[
+        "searching_program"
+    ] = False
 
     channel = CHANNEL_BY_ID.get(
         channel_id
     )
 
-    header = f"📺 {channel['name']}\n\n"
+    header = (
+        f"📺 {channel['name']}\n\n"
+    )
 
-    text_parts = [header]
+    text_parts = [
+        header
+    ]
 
     for program in results:
+
         text_parts.append(
-            format_program(program)
+            format_program(
+                program
+            )
         )
 
-    message = "\n\n".join(text_parts)
+    message = "\n\n".join(
+        text_parts
+    )
 
     if len(message) > TELEGRAM_MESSAGE_LIMIT:
+
         message = message[
             :TELEGRAM_MESSAGE_LIMIT
         ]
@@ -765,23 +1036,35 @@ async def handle_message(
     context: ContextTypes.DEFAULT_TYPE,
 ):
 
+    # Debug log
+    print(
+        "MESSAGE RECEIVED:",
+        repr(update.message.text),
+    )
+
     text = update.message.text.strip()
 
     if not text:
         return
 
-    state = get_user_state(context)
+    state = get_user_state(
+        context
+    )
 
     # --------------------------------------------------------
     # Program search has priority
     # --------------------------------------------------------
 
-    if state.get("searching_program"):
+    if state.get(
+        "searching_program"
+    ):
+
         await handle_program_search(
             update,
             context,
             text,
         )
+
         return
 
     # --------------------------------------------------------
@@ -808,7 +1091,9 @@ async def handle_callback(
 
     await query.answer()
 
-    state = get_user_state(context)
+    state = get_user_state(
+        context
+    )
 
     # --------------------------------------------------------
     # Search another channel
@@ -818,7 +1103,9 @@ async def handle_callback(
 
         reset_state(context)
 
-        state["searching_channel"] = True
+        state[
+            "searching_channel"
+        ] = True
 
         await query.message.reply_text(
             "📺 שלח שם או מספר של ערוץ."
@@ -832,8 +1119,13 @@ async def handle_callback(
 
     if query.data == "search_program":
 
-        state["searching_channel"] = False
-        state["searching_program"] = True
+        state[
+            "searching_channel"
+        ] = False
+
+        state[
+            "searching_program"
+        ] = True
 
         await query.message.reply_text(
             "🔎 שלח את שם התוכנית שאתה מחפש."
@@ -845,7 +1137,9 @@ async def handle_callback(
     # Select channel
     # --------------------------------------------------------
 
-    if query.data.startswith("channel:"):
+    if query.data.startswith(
+        "channel:"
+    ):
 
         channel_id = query.data.split(
             ":",
@@ -866,9 +1160,17 @@ async def handle_callback(
 
             return
 
-        state["selected_channel_id"] = channel_id
-        state["searching_channel"] = False
-        state["searching_program"] = False
+        state[
+            "selected_channel_id"
+        ] = channel_id
+
+        state[
+            "searching_channel"
+        ] = False
+
+        state[
+            "searching_program"
+        ] = False
 
         await query.message.reply_text(
             f"📺 {channel['name']}\n\n"
@@ -889,9 +1191,11 @@ async def handle_callback(
         )
 
         if not channel_id:
+
             await query.message.reply_text(
                 "❌ לא נבחר ערוץ."
             )
+
             return
 
         load_epg()
@@ -908,7 +1212,8 @@ async def handle_callback(
 
             await query.message.reply_text(
                 f"📺 {channel['name']}\n\n"
-                "❌ לא מצאתי כרגע תוכנית משודרת."
+                "❌ לא מצאתי כרגע "
+                "תוכנית משודרת."
             )
 
             return
@@ -932,9 +1237,11 @@ async def handle_callback(
         )
 
         if not channel_id:
+
             await query.message.reply_text(
                 "❌ לא נבחר ערוץ."
             )
+
             return
 
         load_epg()
@@ -951,7 +1258,8 @@ async def handle_callback(
 
             await query.message.reply_text(
                 f"📺 {channel['name']}\n\n"
-                "❌ אין מידע זמין ל־48 השעות האחרונות."
+                "❌ אין מידע זמין "
+                "ל־48 השעות האחרונות."
             )
 
             return
@@ -963,19 +1271,28 @@ async def handle_callback(
         ]
 
         for program in programs:
+
             parts.append(
-                format_program(program)
+                format_program(
+                    program
+                )
             )
+
             parts.append("")
 
-        message = "\n".join(parts)
+        message = "\n".join(
+            parts
+        )
 
         if len(message) > TELEGRAM_MESSAGE_LIMIT:
+
             message = message[
                 :TELEGRAM_MESSAGE_LIMIT
             ]
 
-            message += "\n\n...ההודעה קוצרה"
+            message += (
+                "\n\n...ההודעה קוצרה"
+            )
 
         await query.message.reply_text(
             message,
@@ -996,7 +1313,7 @@ async def error_handler(
 
     print(
         "Telegram error:",
-        context.error,
+        repr(context.error),
     )
 
 
@@ -1008,9 +1325,15 @@ def main():
 
     application = (
         Application.builder()
-        .token(TELEGRAM_BOT_TOKEN)
+        .token(
+            TELEGRAM_BOT_TOKEN
+        )
         .build()
     )
+
+    # --------------------------------------------------------
+    # /start
+    # --------------------------------------------------------
 
     application.add_handler(
         CommandHandler(
@@ -1019,22 +1342,39 @@ def main():
         )
     )
 
+    # --------------------------------------------------------
+    # Inline buttons
+    # --------------------------------------------------------
+
     application.add_handler(
         CallbackQueryHandler(
             handle_callback,
         )
     )
 
+    # --------------------------------------------------------
+    # Regular text messages
+    # --------------------------------------------------------
+
     application.add_handler(
         MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
+            filters.TEXT
+            & ~filters.COMMAND,
             handle_message,
         )
     )
 
+    # --------------------------------------------------------
+    # Errors
+    # --------------------------------------------------------
+
     application.add_error_handler(
         error_handler
     )
+
+    # --------------------------------------------------------
+    # Render Webhook
+    # --------------------------------------------------------
 
     if RENDER_EXTERNAL_URL:
 
@@ -1044,15 +1384,22 @@ def main():
         )
 
         print(
-            f"Starting webhook: {webhook_url}"
+            f"Starting webhook: "
+            f"{webhook_url}"
         )
 
         application.run_webhook(
             listen="0.0.0.0",
             port=PORT,
             webhook_url=webhook_url,
-            url_path=WEBHOOK_PATH.lstrip("/"),
+            url_path=WEBHOOK_PATH.lstrip(
+                "/"
+            ),
         )
+
+    # --------------------------------------------------------
+    # Local polling
+    # --------------------------------------------------------
 
     else:
 
@@ -1062,6 +1409,10 @@ def main():
 
         application.run_polling()
 
+
+# ============================================================
+# ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
     main()
