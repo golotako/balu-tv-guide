@@ -34,13 +34,18 @@ TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 
 EPG_URL = "https://www.open-epg.com/files/israel.xml"
 
-# How often the EPG XML may be downloaded again.
-# This is ONLY cache duration - it is not a user-facing feature.
+# Internal cache only.
+# The user does NOT see a "48 hours" feature.
 EPG_CACHE_HOURS = 48
 
 TELEGRAM_MESSAGE_LIMIT = 4000
 
-PORT = int(os.environ.get("PORT", "10000"))
+PORT = int(
+    os.environ.get(
+        "PORT",
+        "10000"
+    )
+)
 
 WEBHOOK_PATH = "/telegram"
 
@@ -49,14 +54,20 @@ RENDER_EXTERNAL_URL = os.environ.get(
     ""
 ).rstrip("/")
 
-ISRAEL_TZ = ZoneInfo("Asia/Jerusalem")
+ISRAEL_TZ = ZoneInfo(
+    "Asia/Jerusalem"
+)
 
 
 # ============================================================
 # LOAD CHANNEL ALIASES
 # ============================================================
 
-with open("channels.json", "r", encoding="utf-8") as file:
+with open(
+    "channels.json",
+    "r",
+    encoding="utf-8"
+) as file:
     CHANNEL_ALIASES = json.load(file)
 
 
@@ -80,9 +91,6 @@ PROGRAMS_BY_CHANNEL = {}
 # ============================================================
 
 def normalize_text(text):
-    """
-    Normalize text for Hebrew/English searches.
-    """
 
     if not text:
         return ""
@@ -91,7 +99,7 @@ def normalize_text(text):
 
     text = unicodedata.normalize(
         "NFKC",
-        text,
+        text
     )
 
     text = text.lower()
@@ -113,9 +121,10 @@ def normalize_text(text):
 
 
 def extract_numbers(text):
+
     return re.findall(
         r"\d+",
-        text or "",
+        text or ""
     )
 
 
@@ -124,13 +133,6 @@ def extract_numbers(text):
 # ============================================================
 
 def parse_epg_datetime(value):
-    """
-    Parse XMLTV datetime values.
-
-    Examples:
-        20260908193000 +0300
-        20260908193000
-    """
 
     if not value:
         return None
@@ -149,14 +151,20 @@ def parse_epg_datetime(value):
     offset_part = match.group(2)
 
     try:
+
         dt = datetime.strptime(
             date_part,
-            "%Y%m%d%H%M%S",
+            "%Y%m%d%H%M%S"
         )
+
     except ValueError:
+
         return None
 
+    # EPG contains explicit timezone
     if offset_part:
+
+        from datetime import timedelta
 
         sign = (
             1
@@ -172,12 +180,13 @@ def parse_epg_datetime(value):
             offset_part[3:5]
         )
 
-        from datetime import timedelta
-
-        offset = timedelta(
-            hours=hours,
-            minutes=minutes,
-        ) * sign
+        offset = (
+            timedelta(
+                hours=hours,
+                minutes=minutes
+            )
+            * sign
+        )
 
         dt = dt.replace(
             tzinfo=timezone(offset)
@@ -187,7 +196,7 @@ def parse_epg_datetime(value):
             timezone.utc
         )
 
-    # If the EPG has no timezone,
+    # No timezone in EPG:
     # assume Israel local time.
     dt = dt.replace(
         tzinfo=ISRAEL_TZ
@@ -224,11 +233,13 @@ def build_epg_index(root):
     ALIAS_TO_CHANNEL_IDS = {}
     PROGRAMS_BY_CHANNEL = {}
 
-    # --------------------------------------------------------
+    # ========================================================
     # CHANNELS
-    # --------------------------------------------------------
+    # ========================================================
 
-    for channel in root.findall("channel"):
+    for channel in root.findall(
+        "channel"
+    ):
 
         channel_id = channel.attrib.get(
             "id"
@@ -244,6 +255,7 @@ def build_epg_index(root):
         ):
 
             if name.text:
+
                 display_names.append(
                     name.text.strip()
                 )
@@ -261,9 +273,9 @@ def build_epg_index(root):
             channel_id
         ] = channel_data
 
-    # --------------------------------------------------------
+    # ========================================================
     # ALIASES FROM channels.json
-    # --------------------------------------------------------
+    # ========================================================
 
     for channel_entry in CHANNEL_ALIASES:
 
@@ -273,14 +285,12 @@ def build_epg_index(root):
 
         aliases = channel_entry.get(
             "names",
-            [],
+            []
         )
 
         if not channel_id:
             continue
 
-        # Ignore aliases for channels
-        # that don't exist in the EPG.
         if channel_id not in CHANNEL_BY_ID:
             continue
 
@@ -300,9 +310,9 @@ def build_epg_index(root):
                 channel_id
             )
 
-    # --------------------------------------------------------
-    # EPG DISPLAY NAMES ALSO BECOME SEARCHABLE
-    # --------------------------------------------------------
+    # ========================================================
+    # EPG DISPLAY NAMES
+    # ========================================================
 
     for channel in CHANNELS_CACHE:
 
@@ -324,16 +334,16 @@ def build_epg_index(root):
                 channel_id
             )
 
-    # Remove duplicate IDs
+    # Remove duplicates
     for alias, ids in ALIAS_TO_CHANNEL_IDS.items():
 
         ALIAS_TO_CHANNEL_IDS[alias] = list(
             dict.fromkeys(ids)
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # PROGRAMS
-    # --------------------------------------------------------
+    # ========================================================
 
     for program in root.findall(
         "programme"
@@ -350,11 +360,15 @@ def build_epg_index(root):
             continue
 
         start = parse_epg_datetime(
-            program.attrib.get("start")
+            program.attrib.get(
+                "start"
+            )
         )
 
         stop = parse_epg_datetime(
-            program.attrib.get("stop")
+            program.attrib.get(
+                "stop"
+            )
         )
 
         title_element = program.find(
@@ -368,6 +382,7 @@ def build_epg_index(root):
         title = ""
 
         if title_element is not None:
+
             title = (
                 title_element.text or ""
             ).strip()
@@ -375,6 +390,7 @@ def build_epg_index(root):
         description = ""
 
         if desc_element is not None:
+
             description = (
                 desc_element.text or ""
             ).strip()
@@ -397,9 +413,9 @@ def build_epg_index(root):
             program_data
         )
 
-    # --------------------------------------------------------
+    # ========================================================
     # SORT PROGRAMS
-    # --------------------------------------------------------
+    # ========================================================
 
     for channel_id in PROGRAMS_BY_CHANNEL:
 
@@ -449,15 +465,18 @@ def load_epg(force=False):
     )
 
     if cache_valid and not force:
+
         return True
 
-    print("Downloading EPG...")
+    print(
+        "Downloading EPG..."
+    )
 
     try:
 
         response = requests.get(
             EPG_URL,
-            timeout=60,
+            timeout=60
         )
 
         response.raise_for_status()
@@ -466,7 +485,9 @@ def load_epg(force=False):
             response.content
         )
 
-        build_epg_index(root)
+        build_epg_index(
+            root
+        )
 
         EPG_ROOT = root
         EPG_LAST_UPDATE = now
@@ -505,9 +526,9 @@ def find_channels(search_text):
     results = []
     seen = set()
 
-    # --------------------------------------------------------
-    # EXACT ALIAS MATCH
-    # --------------------------------------------------------
+    # ========================================================
+    # EXACT MATCH
+    # ========================================================
 
     exact_matches = (
         ALIAS_TO_CHANNEL_IDS.get(
@@ -537,11 +558,12 @@ def find_channels(search_text):
         )
 
     if results:
+
         return results[:5]
 
-    # --------------------------------------------------------
-    # NORMAL SEARCH
-    # --------------------------------------------------------
+    # ========================================================
+    # FUZZY / PARTIAL SEARCH
+    # ========================================================
 
     query_numbers = extract_numbers(
         query
@@ -560,7 +582,7 @@ def find_channels(search_text):
             )
         )
 
-        # Add aliases from channels.json
+        # Add aliases
         for alias_entry in CHANNEL_ALIASES:
 
             if (
@@ -612,14 +634,14 @@ def find_channels(search_text):
                 ratio = SequenceMatcher(
                     None,
                     query,
-                    normalized_name,
+                    normalized_name
                 ).ratio()
 
                 score = ratio * 70
 
             best_score = max(
                 best_score,
-                score,
+                score
             )
 
         # Number search
@@ -640,7 +662,7 @@ def find_channels(search_text):
 
                 best_score = max(
                     best_score,
-                    95,
+                    95
                 )
 
         if best_score >= 45:
@@ -648,13 +670,13 @@ def find_channels(search_text):
             scored.append(
                 (
                     best_score,
-                    channel,
+                    channel
                 )
             )
 
     scored.sort(
         key=lambda item: item[0],
-        reverse=True,
+        reverse=True
     )
 
     for _, channel in scored:
@@ -684,7 +706,7 @@ def find_channels(search_text):
 
 def search_programs(
     channel_id,
-    search_text,
+    search_text
 ):
 
     if not load_epg():
@@ -730,10 +752,12 @@ def search_programs(
 
 
 # ============================================================
-# PROGRAM HELPERS
+# CURRENT / PREVIOUS / NEXT
 # ============================================================
 
-def get_current_program(channel_id):
+def get_current_program(
+    channel_id
+):
 
     now = datetime.now(
         timezone.utc
@@ -764,7 +788,9 @@ def get_current_program(channel_id):
     return None
 
 
-def get_previous_program(channel_id):
+def get_previous_program(
+    channel_id
+):
 
     now = datetime.now(
         timezone.utc
@@ -799,7 +825,9 @@ def get_previous_program(channel_id):
     return previous
 
 
-def get_next_program(channel_id):
+def get_next_program(
+    channel_id
+):
 
     now = datetime.now(
         timezone.utc
@@ -818,6 +846,7 @@ def get_next_program(channel_id):
             continue
 
         if start > now:
+
             return program
 
     return None
@@ -827,14 +856,16 @@ def get_next_program(channel_id):
 # TODAY'S PROGRAMS
 # ============================================================
 
-def get_today_programs(channel_id):
+def get_today_programs(
+    channel_id
+):
 
     """
-    Returns programs from today's 00:00
-    until the current moment in Israel.
+    Returns all programs that started
+    between today's 00:00 and now,
+    according to Israel time.
 
-    The current program is included.
-
+    The currently playing program is included.
     Future programs are excluded.
     """
 
@@ -848,12 +879,11 @@ def get_today_programs(channel_id):
 
     # Today's midnight in Israel
     today_start_israel = (
-        now_israel
-        .replace(
+        now_israel.replace(
             hour=0,
             minute=0,
             second=0,
-            microsecond=0,
+            microsecond=0
         )
     )
 
@@ -878,8 +908,8 @@ def get_today_programs(channel_id):
         if start is None:
             continue
 
-        # Program started before midnight
-        # and is still running today.
+        # A program that started before midnight
+        # but is still running after midnight.
         if (
             start < today_start_utc
             and stop is not None
@@ -893,8 +923,7 @@ def get_today_programs(channel_id):
 
             continue
 
-        # Programs that started today
-        # and have already started.
+        # Program started today and has already begun.
         if (
             start >= today_start_utc
             and start <= now_utc
@@ -904,7 +933,7 @@ def get_today_programs(channel_id):
                 program
             )
 
-    # Remove accidental duplicates
+    # Remove duplicates
     unique_programs = []
     seen = set()
 
@@ -919,7 +948,9 @@ def get_today_programs(channel_id):
         if key in seen:
             continue
 
-        seen.add(key)
+        seen.add(
+            key
+        )
 
         unique_programs.append(
             program
@@ -956,13 +987,36 @@ def format_time(dt):
 
 
 # ============================================================
-# PROGRAM FORMAT
+# CHANNEL NAME
 # ============================================================
 
-def format_program(
+def get_channel_display_name(
+    channel
+):
+
+    names = channel.get(
+        "names",
+        []
+    )
+
+    if names:
+
+        return names[0]
+
+    return channel.get(
+        "id",
+        "ערוץ"
+    )
+
+
+# ============================================================
+# PROGRAM CARD
+# ============================================================
+
+def format_program_card(
     program,
     label,
-    emoji,
+    emoji
 ):
 
     if not program:
@@ -982,34 +1036,11 @@ def format_program(
         program["stop"]
     )
 
-    text = (
+    return (
         f"{emoji} <b>{label}</b>\n"
-        f"<b>{title}</b>\n"
+        f"🎬 <b>{title}</b>\n"
         f"🕐 {start} - {stop}"
     )
-
-    description = (
-        program.get(
-            "description",
-            ""
-        ).strip()
-    )
-
-    if description:
-
-        if len(description) > 300:
-
-            description = (
-                description[:297]
-                + "..."
-            )
-
-        text += (
-            f"\n\n"
-            f"📝 {description}"
-        )
-
-    return text
 
 
 # ============================================================
@@ -1017,8 +1048,7 @@ def format_program(
 # ============================================================
 
 def build_channel_screen(
-    channel_id,
-    mode="current",
+    channel_id
 ):
 
     channel = CHANNEL_BY_ID.get(
@@ -1031,11 +1061,11 @@ def build_channel_screen(
             "❌ הערוץ לא נמצא."
         )
 
-    current = get_current_program(
+    previous = get_previous_program(
         channel_id
     )
 
-    previous = get_previous_program(
+    current = get_current_program(
         channel_id
     )
 
@@ -1043,85 +1073,65 @@ def build_channel_screen(
         channel_id
     )
 
-    # --------------------------------------------------------
-    # Center program when navigating
-    # --------------------------------------------------------
-
-    if (
-        mode == "previous"
-        and previous
-    ):
-
-        center_program = previous
-        center_label = "הקודמת"
-        center_emoji = "⏮️"
-
-    elif (
-        mode == "next"
-        and next_program
-    ):
-
-        center_program = next_program
-        center_label = "הבאה"
-        center_emoji = "⏭️"
-
-    else:
-
-        center_program = current
-        center_label = "עכשיו"
-        center_emoji = "🔴"
-
-    # --------------------------------------------------------
-    # CHANNEL NAME
-    # --------------------------------------------------------
-
-    channel_names = channel.get(
-        "names",
-        []
+    channel_name = (
+        get_channel_display_name(
+            channel
+        )
     )
-
-    if channel_names:
-        channel_name = channel_names[0]
-    else:
-        channel_name = channel_id
-
-    # --------------------------------------------------------
-    # SCREEN
-    # --------------------------------------------------------
 
     text = (
         f"📺 <b>{channel_name}</b>\n\n"
     )
 
-    # Previous
-    text += format_program(
+    # ========================================================
+    # PREVIOUS
+    # ========================================================
+
+    text += format_program_card(
         previous,
         "הקודמת",
-        "⏮️",
+        "⏮️"
     )
 
     text += (
         "\n\n"
-        "━━━━━━━━━━━━━━\n\n"
+        "━━━━━━━━━━━━━━"
+        "\n\n"
     )
 
-    # Current / selected
-    text += format_program(
-        center_program,
-        center_label,
-        center_emoji,
-    )
+    # ========================================================
+    # CURRENT
+    # ========================================================
+
+    if current:
+
+        text += format_program_card(
+            current,
+            "עכשיו",
+            "🔴"
+        )
+
+    else:
+
+        text += (
+            "⏸️ <b>עכשיו</b>\n"
+            "אין שידור כרגע"
+        )
 
     text += (
         "\n\n"
-        "━━━━━━━━━━━━━━\n\n"
+        "━━━━━━━━━━━━━━"
+        "\n\n"
     )
 
-    # Next
-    text += format_program(
+    # ========================================================
+    # NEXT
+    # ========================================================
+
+    text += format_program_card(
         next_program,
         "הבאה",
-        "⏭️",
+        "⏭️"
     )
 
     return text
@@ -1131,7 +1141,9 @@ def build_channel_screen(
 # TODAY SCREEN
 # ============================================================
 
-def build_today_screen(channel_id):
+def build_today_screen(
+    channel_id
+):
 
     channel = CHANNEL_BY_ID.get(
         channel_id
@@ -1147,15 +1159,15 @@ def build_today_screen(channel_id):
         channel_id
     )
 
-    channel_names = channel.get(
-        "names",
-        []
+    current = get_current_program(
+        channel_id
     )
 
-    if channel_names:
-        channel_name = channel_names[0]
-    else:
-        channel_name = channel_id
+    channel_name = (
+        get_channel_display_name(
+            channel
+        )
+    )
 
     now_israel = datetime.now(
         timezone.utc
@@ -1182,13 +1194,11 @@ def build_today_screen(channel_id):
 
         return text
 
-    current = get_current_program(
-        channel_id
-    )
+    # ========================================================
+    # PROGRAM LIST
+    # ========================================================
 
-    for index, program in enumerate(
-        programs
-    ):
+    for program in programs:
 
         start = format_time(
             program["start"]
@@ -1207,8 +1217,11 @@ def build_today_screen(channel_id):
         if is_current:
 
             text += (
-                f"🔴 <b>{start} - {stop}</b>  "
-                f"<b>{title}</b> ← עכשיו\n"
+                f"🔴 <b>"
+                f"{start} - {stop}"
+                f"</b>  "
+                f"<b>{title}</b>"
+                f" ← עכשיו\n"
             )
 
         else:
@@ -1224,11 +1237,12 @@ def build_today_screen(channel_id):
         "🔴 = משודר עכשיו"
     )
 
-    # Telegram hard limit safety
+    # ========================================================
+    # TELEGRAM MESSAGE LIMIT
+    # ========================================================
+
     if len(text) > TELEGRAM_MESSAGE_LIMIT:
 
-        # Keep header and as much schedule
-        # as possible.
         header = (
             f"📺 <b>{channel_name}</b>\n"
             f"📅 <b>מה שודר היום</b>\n"
@@ -1236,7 +1250,8 @@ def build_today_screen(channel_id):
         )
 
         footer = (
-            "\n━━━━━━━━━━━━━━\n"
+            "\n...\n"
+            "━━━━━━━━━━━━━━\n"
             "🔴 = משודר עכשיו"
         )
 
@@ -1264,14 +1279,23 @@ def build_today_screen(channel_id):
             current_marker = ""
 
             if current is program:
-                current_marker = " ← עכשיו"
+
+                current_marker = (
+                    " ← עכשיו"
+                )
 
             line = (
                 f"• {start} - {stop}  "
-                f"{title}{current_marker}\n"
+                f"{title}"
+                f"{current_marker}\n"
             )
 
-            if len(schedule) + len(line) > available:
+            if (
+                len(schedule)
+                + len(line)
+                > available
+            ):
+
                 break
 
             schedule += line
@@ -1279,7 +1303,6 @@ def build_today_screen(channel_id):
         text = (
             header
             + schedule
-            + "\n...\n"
             + footer
         )
 
@@ -1296,35 +1319,21 @@ def channel_keyboard():
         [
             [
                 InlineKeyboardButton(
-                    "⏮️ הקודמת",
-                    callback_data="previous",
-                ),
-                InlineKeyboardButton(
-                    "🔴 עכשיו",
-                    callback_data="current",
-                ),
-                InlineKeyboardButton(
-                    "⏭️ הבאה",
-                    callback_data="next",
-                ),
-            ],
-            [
-                InlineKeyboardButton(
                     "📅 מה שודר היום",
-                    callback_data="today",
-                ),
+                    callback_data="today"
+                )
             ],
             [
                 InlineKeyboardButton(
                     "🔎 חיפוש תוכנית",
-                    callback_data="search_program",
-                ),
+                    callback_data="search_program"
+                )
             ],
             [
                 InlineKeyboardButton(
                     "📺 ערוץ אחר",
-                    callback_data="search_channel",
-                ),
+                    callback_data="search_channel"
+                )
             ],
         ]
     )
@@ -1341,20 +1350,20 @@ def today_keyboard():
             [
                 InlineKeyboardButton(
                     "⬅️ חזרה לערוץ",
-                    callback_data="back_channel",
+                    callback_data="back_channel"
                 )
             ],
             [
                 InlineKeyboardButton(
                     "🔎 חיפוש תוכנית",
-                    callback_data="search_program",
-                ),
+                    callback_data="search_program"
+                )
             ],
             [
                 InlineKeyboardButton(
                     "📺 ערוץ אחר",
-                    callback_data="search_channel",
-                ),
+                    callback_data="search_channel"
+                )
             ],
         ]
     )
@@ -1366,7 +1375,7 @@ def today_keyboard():
 
 async def start(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    context: ContextTypes.DEFAULT_TYPE
 ):
 
     context.user_data["state"] = (
@@ -1375,7 +1384,7 @@ async def start(
 
     context.user_data.pop(
         "selected_channel_id",
-        None,
+        None
     )
 
     await update.message.reply_text(
@@ -1388,7 +1397,7 @@ async def start(
         "• ספורט 5\n"
         "• בית+\n\n"
         "🔎 כתוב את שם הערוץ:",
-        parse_mode="HTML",
+        parse_mode="HTML"
     )
 
 
@@ -1398,7 +1407,7 @@ async def start(
 
 async def handle_channel_search(
     update,
-    context,
+    context
 ):
 
     text = (
@@ -1424,21 +1433,19 @@ async def handle_channel_search(
 
         channel_id = channel["id"]
 
-        names = channel.get(
-            "names",
-            []
+        display_name = (
+            get_channel_display_name(
+                channel
+            )
         )
-
-        if names:
-            display_name = names[0]
-        else:
-            display_name = channel_id
 
         buttons.append(
             [
                 InlineKeyboardButton(
                     f"📺 {display_name}",
-                    callback_data=f"channel:{channel_id}",
+                    callback_data=(
+                        f"channel:{channel_id}"
+                    )
                 )
             ]
         )
@@ -1448,7 +1455,7 @@ async def handle_channel_search(
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(
             buttons
-        ),
+        )
     )
 
 
@@ -1458,7 +1465,7 @@ async def handle_channel_search(
 
 async def handle_program_search(
     update,
-    context,
+    context
 ):
 
     channel_id = context.user_data.get(
@@ -1483,7 +1490,7 @@ async def handle_program_search(
 
     programs = search_programs(
         channel_id,
-        query,
+        query
     )
 
     if not programs:
@@ -1526,7 +1533,9 @@ async def handle_program_search(
             [
                 InlineKeyboardButton(
                     label,
-                    callback_data=f"program_result:{index}",
+                    callback_data=(
+                        f"program_result:{index}"
+                    )
                 )
             ]
         )
@@ -1535,7 +1544,7 @@ async def handle_program_search(
         [
             InlineKeyboardButton(
                 "⬅️ חזרה לערוץ",
-                callback_data="back_channel",
+                callback_data="back_channel"
             )
         ]
     )
@@ -1545,7 +1554,7 @@ async def handle_program_search(
         parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(
             buttons
-        ),
+        )
     )
 
     context.user_data["state"] = (
@@ -1558,8 +1567,8 @@ async def handle_program_search(
 # ============================================================
 
 async def handle_message(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update,
+    context
 ):
 
     if not update.message:
@@ -1567,27 +1576,27 @@ async def handle_message(
 
     print(
         "MESSAGE RECEIVED:",
-        repr(update.message.text),
+        repr(update.message.text)
     )
 
     state = context.user_data.get(
         "state"
     )
 
-    # Program search has priority
+    # Program search
     if state == "searching_program":
 
         await handle_program_search(
             update,
-            context,
+            context
         )
 
         return
 
-    # Otherwise search channels
+    # Channel search
     await handle_channel_search(
         update,
-        context,
+        context
     )
 
 
@@ -1596,8 +1605,8 @@ async def handle_message(
 # ============================================================
 
 async def handle_callback(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE,
+    update,
+    context
 ):
 
     query = update.callback_query
@@ -1619,7 +1628,7 @@ async def handle_callback(
         await query.edit_message_text(
             "📺 <b>חיפוש ערוץ</b>\n\n"
             "כתוב את שם הערוץ או המספר שלו:",
-            parse_mode="HTML",
+            parse_mode="HTML"
         )
 
         return
@@ -1653,7 +1662,7 @@ async def handle_callback(
         await query.edit_message_text(
             "🔎 <b>חיפוש תוכנית</b>\n\n"
             "כתוב את שם התוכנית שאתה מחפש:",
-            parse_mode="HTML",
+            parse_mode="HTML"
         )
 
         return
@@ -1676,14 +1685,13 @@ async def handle_callback(
         )
 
         text = build_channel_screen(
-            channel_id,
-            mode="current",
+            channel_id
         )
 
         await query.edit_message_text(
             text,
             parse_mode="HTML",
-            reply_markup=channel_keyboard(),
+            reply_markup=channel_keyboard()
         )
 
         return
@@ -1718,96 +1726,13 @@ async def handle_callback(
         )
 
         text = build_channel_screen(
-            channel_id,
-            mode="current",
+            channel_id
         )
 
         await query.edit_message_text(
             text,
             parse_mode="HTML",
-            reply_markup=channel_keyboard(),
-        )
-
-        return
-
-    # ========================================================
-    # PREVIOUS
-    # ========================================================
-
-    if data == "previous":
-
-        channel_id = context.user_data.get(
-            "selected_channel_id"
-        )
-
-        if not channel_id:
-            return
-
-        text = build_channel_screen(
-            channel_id,
-            mode="previous",
-        )
-
-        await query.edit_message_text(
-            text,
-            parse_mode="HTML",
-            reply_markup=channel_keyboard(),
-        )
-
-        return
-
-    # ========================================================
-    # CURRENT
-    # ========================================================
-
-    if data == "current":
-
-        channel_id = context.user_data.get(
-            "selected_channel_id"
-        )
-
-        if not channel_id:
-            return
-
-        # This will use cache unless
-        # the 48-hour cache expired.
-        load_epg()
-
-        text = build_channel_screen(
-            channel_id,
-            mode="current",
-        )
-
-        await query.edit_message_text(
-            text,
-            parse_mode="HTML",
-            reply_markup=channel_keyboard(),
-        )
-
-        return
-
-    # ========================================================
-    # NEXT
-    # ========================================================
-
-    if data == "next":
-
-        channel_id = context.user_data.get(
-            "selected_channel_id"
-        )
-
-        if not channel_id:
-            return
-
-        text = build_channel_screen(
-            channel_id,
-            mode="next",
-        )
-
-        await query.edit_message_text(
-            text,
-            parse_mode="HTML",
-            reply_markup=channel_keyboard(),
+            reply_markup=channel_keyboard()
         )
 
         return
@@ -1825,8 +1750,8 @@ async def handle_callback(
         if not channel_id:
             return
 
-        # Refresh EPG only if the cache
-        # has expired.
+        # Uses cached EPG unless
+        # the 48-hour cache expired.
         load_epg()
 
         text = build_today_screen(
@@ -1836,7 +1761,7 @@ async def handle_callback(
         await query.edit_message_text(
             text,
             parse_mode="HTML",
-            reply_markup=today_keyboard(),
+            reply_markup=today_keyboard()
         )
 
         return
@@ -1871,6 +1796,7 @@ async def handle_callback(
             index < 0
             or index >= len(programs)
         ):
+
             return
 
         program = programs[index]
@@ -1916,13 +1842,17 @@ async def handle_callback(
             [
                 InlineKeyboardButton(
                     "⬅️ חזרה לתוצאות",
-                    callback_data="back_program_results",
+                    callback_data=(
+                        "back_program_results"
+                    )
                 )
             ],
             [
                 InlineKeyboardButton(
                     "📺 חזרה לערוץ",
-                    callback_data="back_channel",
+                    callback_data=(
+                        "back_channel"
+                    )
                 )
             ],
         ]
@@ -1932,7 +1862,7 @@ async def handle_callback(
             parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup(
                 buttons
-            ),
+            )
         )
 
         return
@@ -1978,7 +1908,9 @@ async def handle_callback(
                 [
                     InlineKeyboardButton(
                         label,
-                        callback_data=f"program_result:{index}",
+                        callback_data=(
+                            f"program_result:{index}"
+                        )
                     )
                 ]
             )
@@ -1987,7 +1919,9 @@ async def handle_callback(
             [
                 InlineKeyboardButton(
                     "⬅️ חזרה לערוץ",
-                    callback_data="back_channel",
+                    callback_data=(
+                        "back_channel"
+                    )
                 )
             ]
         )
@@ -1997,7 +1931,7 @@ async def handle_callback(
             parse_mode="HTML",
             reply_markup=InlineKeyboardMarkup(
                 buttons
-            ),
+            )
         )
 
         return
@@ -2009,12 +1943,12 @@ async def handle_callback(
 
 async def error_handler(
     update,
-    context,
+    context
 ):
 
     print(
         "Telegram error:",
-        context.error,
+        context.error
     )
 
 
@@ -2035,13 +1969,13 @@ def main():
     application.add_handler(
         CommandHandler(
             "start",
-            start,
+            start
         )
     )
 
     application.add_handler(
         CallbackQueryHandler(
-            handle_callback,
+            handle_callback
         )
     )
 
@@ -2049,7 +1983,7 @@ def main():
         MessageHandler(
             filters.TEXT
             & ~filters.COMMAND,
-            handle_message,
+            handle_message
         )
     )
 
@@ -2077,7 +2011,7 @@ def main():
             listen="0.0.0.0",
             port=PORT,
             webhook_url=webhook_url,
-            url_path=WEBHOOK_PATH.lstrip("/"),
+            url_path=WEBHOOK_PATH.lstrip("/")
         )
 
     # ========================================================
@@ -2093,5 +2027,10 @@ def main():
         application.run_polling()
 
 
+# ============================================================
+# ENTRY POINT
+# ============================================================
+
 if __name__ == "__main__":
+
     main()
