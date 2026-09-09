@@ -1,10 +1,11 @@
+import html
 import json
 import os
 import re
 import unicodedata
 import xml.etree.ElementTree as ET
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from difflib import SequenceMatcher
 from zoneinfo import ZoneInfo
 
@@ -1015,18 +1016,15 @@ def get_channel_display_name(
 
 def format_program_card(
     program,
-    label,
     emoji
 ):
 
     if not program:
-
         return (
-            f"{emoji} <b>{label}</b>\n"
-            f"לא נמצא מידע"
+            f"{emoji} <b>אין מידע</b>"
         )
 
-    title = program["title"]
+    title = html.escape(program["title"])
 
     start = format_time(
         program["start"]
@@ -1037,9 +1035,8 @@ def format_program_card(
     )
 
     return (
-        f"{emoji} <b>{label}</b>\n"
-        f"🎬 <b>{title}</b>\n"
-        f"🕐 {start} - {stop}"
+        f"{emoji} <b>{start}–{stop}</b>\n"
+        f"{title}"
     )
 
 
@@ -1056,7 +1053,6 @@ def build_channel_screen(
     )
 
     if not channel:
-
         return (
             "❌ הערוץ לא נמצא."
         )
@@ -1073,25 +1069,22 @@ def build_channel_screen(
         channel_id
     )
 
-    channel_name = (
-        get_channel_display_name(
-            channel
-        )
+    channel_name = html.escape(
+        get_channel_display_name(channel)
     )
 
     text = (
         f"📺 <b>{channel_name}</b>\n\n"
     )
 
-    # ========================================================
-    # PREVIOUS
-    # ========================================================
-
-    text += format_program_card(
-        previous,
-        "הקודמת",
-        "⏮️"
-    )
+    # Previous
+    if previous:
+        text += format_program_card(
+            previous,
+            "⏮️"
+        )
+    else:
+        text += "⏮️ <b>אין מידע</b>"
 
     text += (
         "\n\n"
@@ -1099,23 +1092,15 @@ def build_channel_screen(
         "\n\n"
     )
 
-    # ========================================================
-    # CURRENT
-    # ========================================================
-
+    # Current
     if current:
-
         text += format_program_card(
             current,
-            "עכשיו",
             "🔴"
         )
-
     else:
-
         text += (
-            "⏸️ <b>עכשיו</b>\n"
-            "אין שידור כרגע"
+            "⏸️ <b>אין שידור כרגע</b>"
         )
 
     text += (
@@ -1124,15 +1109,14 @@ def build_channel_screen(
         "\n\n"
     )
 
-    # ========================================================
-    # NEXT
-    # ========================================================
-
-    text += format_program_card(
-        next_program,
-        "הבאה",
-        "⏭️"
-    )
+    # Next
+    if next_program:
+        text += format_program_card(
+            next_program,
+            "⏭️"
+        )
+    else:
+        text += "⏭️ <b>אין מידע</b>"
 
     return text
 
@@ -1150,7 +1134,6 @@ def build_today_screen(
     )
 
     if not channel:
-
         return (
             "❌ הערוץ לא נמצא."
         )
@@ -1163,10 +1146,8 @@ def build_today_screen(
         channel_id
     )
 
-    channel_name = (
-        get_channel_display_name(
-            channel
-        )
+    channel_name = html.escape(
+        get_channel_display_name(channel)
     )
 
     now_israel = datetime.now(
@@ -1186,61 +1167,37 @@ def build_today_screen(
     )
 
     if not programs:
-
         text += (
-            "אין מידע על תוכניות "
-            "ששודרו היום."
+            "אין מידע על תוכניות ששודרו היום."
         )
-
         return text
-
-    # ========================================================
-    # PROGRAM LIST
-    # ========================================================
 
     for program in programs:
 
-        start = format_time(
+        start_time = format_time(
             program["start"]
         )
 
-        stop = format_time(
+        stop_time = format_time(
             program["stop"]
         )
 
-        title = program["title"]
-
-        is_current = (
-            current is program
+        title = html.escape(
+            program["title"]
         )
 
-        if is_current:
-
+        if current is program:
             text += (
-                f"🔴 <b>"
-                f"{start} - {stop}"
-                f"</b>  "
-                f"<b>{title}</b>"
-                f" ← עכשיו\n"
+                f"🔴 <b>{start_time}–{stop_time}</b>  "
+                f"<b>{title}</b>\n"
             )
-
         else:
-
             text += (
-                f"• {start} - {stop}  "
+                f"• {start_time}–{stop_time}  "
                 f"{title}\n"
             )
 
-    text += (
-        "\n"
-        "━━━━━━━━━━━━━━\n"
-        "🔴 = משודר עכשיו"
-    )
-
-    # ========================================================
-    # TELEGRAM MESSAGE LIMIT
-    # ========================================================
-
+    # Keep the complete header and schedule within Telegram's limit.
     if len(text) > TELEGRAM_MESSAGE_LIMIT:
 
         header = (
@@ -1249,53 +1206,41 @@ def build_today_screen(
             f"{date_text}\n\n"
         )
 
-        footer = (
-            "\n...\n"
-            "━━━━━━━━━━━━━━\n"
-            "🔴 = משודר עכשיו"
-        )
-
-        available = (
-            TELEGRAM_MESSAGE_LIMIT
-            - len(header)
-            - len(footer)
-            - 20
-        )
-
         schedule = ""
 
         for program in programs:
 
-            start = format_time(
+            start_time = format_time(
                 program["start"]
             )
 
-            stop = format_time(
+            stop_time = format_time(
                 program["stop"]
             )
 
-            title = program["title"]
+            title = html.escape(
+                program["title"]
+            )
 
-            current_marker = ""
-
-            if current is program:
-
-                current_marker = (
-                    " ← עכשיו"
-                )
+            current_marker = (
+                "🔴 "
+                if current is program
+                else "• "
+            )
 
             line = (
-                f"• {start} - {stop}  "
-                f"{title}"
-                f"{current_marker}\n"
+                f"{current_marker}"
+                f"{start_time}–{stop_time}  "
+                f"{title}\n"
             )
 
             if (
-                len(schedule)
+                len(header)
+                + len(schedule)
                 + len(line)
-                > available
+                + 20
+                > TELEGRAM_MESSAGE_LIMIT
             ):
-
                 break
 
             schedule += line
@@ -1303,7 +1248,207 @@ def build_today_screen(
         text = (
             header
             + schedule
-            + footer
+            + "..."
+        )
+
+    return text
+
+
+# ============================================================
+# PRIME TIME
+# ============================================================
+
+def get_prime_time_programs(
+    channel_id
+):
+
+    now_utc = datetime.now(
+        timezone.utc
+    )
+
+    now_israel = now_utc.astimezone(
+        ISRAEL_TZ
+    )
+
+    prime_start_israel = now_israel.replace(
+        hour=20,
+        minute=0,
+        second=0,
+        microsecond=0
+    )
+
+    prime_end_israel = (
+        prime_start_israel
+        + timedelta(days=1)
+    )
+
+    prime_start_utc = (
+        prime_start_israel.astimezone(
+            timezone.utc
+        )
+    )
+
+    prime_end_utc = (
+        prime_end_israel.astimezone(
+            timezone.utc
+        )
+    )
+
+    programs = PROGRAMS_BY_CHANNEL.get(
+        channel_id,
+        []
+    )
+
+    prime_time_programs = []
+
+    for program in programs:
+
+        start = program["start"]
+        stop = program["stop"]
+
+        if start is None:
+            continue
+
+        # Include every program that overlaps 20:00–00:00.
+        if (
+            start < prime_end_utc
+            and (
+                stop is None
+                or stop > prime_start_utc
+            )
+        ):
+            prime_time_programs.append(
+                program
+            )
+
+    return prime_time_programs
+
+
+def build_prime_time_screen(
+    channel_id
+):
+
+    channel = CHANNEL_BY_ID.get(
+        channel_id
+    )
+
+    if not channel:
+        return (
+            "❌ הערוץ לא נמצא."
+        )
+
+    programs = get_prime_time_programs(
+        channel_id
+    )
+
+    current = get_current_program(
+        channel_id
+    )
+
+    channel_name = html.escape(
+        get_channel_display_name(channel)
+    )
+
+    now_israel = datetime.now(
+        timezone.utc
+    ).astimezone(
+        ISRAEL_TZ
+    )
+
+    date_text = now_israel.strftime(
+        "%d/%m/%Y"
+    )
+
+    text = (
+        f"📺 <b>{channel_name}</b>\n"
+        f"🌙 <b>פריים טיים</b>\n"
+        f"{date_text}\n"
+        f"20:00–00:00\n\n"
+    )
+
+    if not programs:
+        text += (
+            "אין מידע על תוכניות בפריים טיים."
+        )
+        return text
+
+    for program in programs:
+
+        start_time = format_time(
+            program["start"]
+        )
+
+        stop_time = format_time(
+            program["stop"]
+        )
+
+        title = html.escape(
+            program["title"]
+        )
+
+        if current is program:
+            text += (
+                f"🔴 <b>{start_time}–{stop_time}</b>  "
+                f"<b>{title}</b>\n"
+            )
+        else:
+            text += (
+                f"• {start_time}–{stop_time}  "
+                f"{title}\n"
+            )
+
+    if len(text) > TELEGRAM_MESSAGE_LIMIT:
+
+        header = (
+            f"📺 <b>{channel_name}</b>\n"
+            f"🌙 <b>פריים טיים</b>\n"
+            f"{date_text}\n"
+            f"20:00–00:00\n\n"
+        )
+
+        schedule = ""
+
+        for program in programs:
+
+            start_time = format_time(
+                program["start"]
+            )
+
+            stop_time = format_time(
+                program["stop"]
+            )
+
+            title = html.escape(
+                program["title"]
+            )
+
+            marker = (
+                "🔴 "
+                if current is program
+                else "• "
+            )
+
+            line = (
+                f"{marker}"
+                f"{start_time}–{stop_time}  "
+                f"{title}\n"
+            )
+
+            if (
+                len(header)
+                + len(schedule)
+                + len(line)
+                + 20
+                > TELEGRAM_MESSAGE_LIMIT
+            ):
+                break
+
+            schedule += line
+
+        text = (
+            header
+            + schedule
+            + "..."
         )
 
     return text
@@ -1321,6 +1466,10 @@ def channel_keyboard():
                 InlineKeyboardButton(
                     "📅 מה שודר היום",
                     callback_data="today"
+                ),
+                InlineKeyboardButton(
+                    "🌙 פריים טיים",
+                    callback_data="prime_time"
                 )
             ],
             [
@@ -1351,6 +1500,44 @@ def today_keyboard():
                 InlineKeyboardButton(
                     "⬅️ חזרה לערוץ",
                     callback_data="back_channel"
+                ),
+                InlineKeyboardButton(
+                    "🌙 פריים טיים",
+                    callback_data="prime_time"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "🔎 חיפוש תוכנית",
+                    callback_data="search_program"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "📺 ערוץ אחר",
+                    callback_data="search_channel"
+                )
+            ],
+        ]
+    )
+
+
+# ============================================================
+# PRIME TIME KEYBOARD
+# ============================================================
+
+def prime_time_keyboard():
+
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "⬅️ חזרה לערוץ",
+                    callback_data="back_channel"
+                ),
+                InlineKeyboardButton(
+                    "📅 מה שודר היום",
+                    callback_data="today"
                 )
             ],
             [
@@ -1762,6 +1949,33 @@ async def handle_callback(
             text,
             parse_mode="HTML",
             reply_markup=today_keyboard()
+        )
+
+        return
+
+    # ========================================================
+    # PRIME TIME
+    # ========================================================
+
+    if data == "prime_time":
+
+        channel_id = context.user_data.get(
+            "selected_channel_id"
+        )
+
+        if not channel_id:
+            return
+
+        load_epg()
+
+        text = build_prime_time_screen(
+            channel_id
+        )
+
+        await query.edit_message_text(
+            text,
+            parse_mode="HTML",
+            reply_markup=prime_time_keyboard()
         )
 
         return
