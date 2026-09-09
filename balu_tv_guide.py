@@ -223,178 +223,118 @@ def to_israel_time(dt):
 # ============================================================
 
 def build_epg_index(root):
-
     global CHANNELS_CACHE
     global CHANNEL_BY_ID
     global ALIAS_TO_CHANNEL_IDS
     global PROGRAMS_BY_CHANNEL
 
-    CHANNELS_CACHE = []
-    CHANNEL_BY_ID = {}
-    ALIAS_TO_CHANNEL_IDS = {}
-    PROGRAMS_BY_CHANNEL = {}
+    # Build everything locally first.
+    # The global indexes are replaced only after successful indexing.
+    channels_cache = []
+    channel_by_id = {}
+    alias_to_channel_ids = {}
+    programs_by_channel = {}
+
+    # Build a direct alias lookup by channel ID.
+    # This avoids scanning CHANNEL_ALIASES for every EPG channel.
+    aliases_by_channel_id = {
+        entry.get("id"): entry.get("names", [])
+        for entry in CHANNEL_ALIASES
+        if entry.get("id")
+    }
 
     # ========================================================
     # CHANNELS
     # ========================================================
 
-    for channel in root.findall(
-        "channel"
-    ):
-
-        channel_id = channel.attrib.get(
-            "id"
-        )
+    for channel in root.findall("channel"):
+        channel_id = channel.attrib.get("id")
 
         if not channel_id:
             continue
 
         display_names = []
 
-        for name in channel.findall(
-            "display-name"
-        ):
-
+        for name in channel.findall("display-name"):
             if name.text:
-
-                display_names.append(
-                    name.text.strip()
-                )
+                display_names.append(name.text.strip())
 
         channel_data = {
             "id": channel_id,
             "names": display_names,
         }
 
-        CHANNELS_CACHE.append(
-            channel_data
-        )
-
-        CHANNEL_BY_ID[
-            channel_id
-        ] = channel_data
+        channels_cache.append(channel_data)
+        channel_by_id[channel_id] = channel_data
 
     # ========================================================
-    # ALIASES FROM channels.json
+    # ALIASES + EPG DISPLAY NAMES
     # ========================================================
 
-    for channel_entry in CHANNEL_ALIASES:
-
-        channel_id = channel_entry.get(
-            "id"
-        )
-
-        aliases = channel_entry.get(
-            "names",
-            []
-        )
-
-        if not channel_id:
-            continue
-
-        if channel_id not in CHANNEL_BY_ID:
-            continue
-
-        for alias in aliases:
-
-            normalized_alias = normalize_text(
-                alias
-            )
-
-            if not normalized_alias:
-                continue
-
-            ALIAS_TO_CHANNEL_IDS.setdefault(
-                normalized_alias,
-                []
-            ).append(
-                channel_id
-            )
-
-    # ========================================================
-    # EPG DISPLAY NAMES
-    # ========================================================
-
-    for channel in CHANNELS_CACHE:
-
+    for channel in channels_cache:
         channel_id = channel["id"]
 
+        # EPG display names
         for name in channel["names"]:
-
-            normalized_name = normalize_text(
-                name
-            )
+            normalized_name = normalize_text(name)
 
             if not normalized_name:
                 continue
 
-            ALIAS_TO_CHANNEL_IDS.setdefault(
-                normalized_name,
-                []
-            ).append(
-                channel_id
-            )
+            alias_to_channel_ids.setdefault(
+                normalized_name, []
+            ).append(channel_id)
 
-    # Remove duplicates
-    for alias, ids in ALIAS_TO_CHANNEL_IDS.items():
+        # Configured aliases
+        for alias in aliases_by_channel_id.get(channel_id, []):
+            normalized_alias = normalize_text(alias)
 
-        ALIAS_TO_CHANNEL_IDS[alias] = list(
-            dict.fromkeys(ids)
-        )
+            if not normalized_alias:
+                continue
+
+            alias_to_channel_ids.setdefault(
+                normalized_alias, []
+            ).append(channel_id)
+
+    # Remove duplicate channel IDs while preserving order.
+    for alias, ids in alias_to_channel_ids.items():
+        alias_to_channel_ids[alias] = list(dict.fromkeys(ids))
 
     # ========================================================
     # PROGRAMS
     # ========================================================
 
-    for program in root.findall(
-        "programme"
-    ):
-
-        channel_id = program.attrib.get(
-            "channel"
-        )
+    for program in root.findall("programme"):
+        channel_id = program.attrib.get("channel")
 
         if not channel_id:
             continue
 
-        if channel_id not in CHANNEL_BY_ID:
+        if channel_id not in channel_by_id:
             continue
 
         start = parse_epg_datetime(
-            program.attrib.get(
-                "start"
-            )
+            program.attrib.get("start")
         )
 
         stop = parse_epg_datetime(
-            program.attrib.get(
-                "stop"
-            )
+            program.attrib.get("stop")
         )
 
-        title_element = program.find(
-            "title"
+        title_element = program.find("title")
+        desc_element = program.find("desc")
+
+        title = (
+            (title_element.text or "").strip()
+            if title_element is not None
+            else ""
         )
 
-        desc_element = program.find(
-            "desc"
+        description = (
+            (desc_element.text or "").strip()
+            if desc_element is not None
+            else ""
         )
-
-        title = ""
-
-        if title_element is not None:
-
-            title = (
-                title_element.text or ""
-            ).strip()
-
-        description = ""
-
-        if desc_element is not None:
-
-            description = (
-                desc_element.text or ""
-            ).strip()
 
         if not title:
             title = "ללא שם"
@@ -407,34 +347,33 @@ def build_epg_index(root):
             "stop": stop,
         }
 
-        PROGRAMS_BY_CHANNEL.setdefault(
-            channel_id,
-            []
-        ).append(
-            program_data
-        )
+        programs_by_channel.setdefault(
+            channel_id, []
+        ).append(program_data)
 
     # ========================================================
     # SORT PROGRAMS
     # ========================================================
 
-    for channel_id in PROGRAMS_BY_CHANNEL:
+    min_utc = datetime.min.replace(
+        tzinfo=timezone.utc
+    )
 
-        PROGRAMS_BY_CHANNEL[
-            channel_id
-        ].sort(
-            key=lambda p: (
-                p["start"]
-                or datetime.min.replace(
-                    tzinfo=timezone.utc
-                )
-            )
+    for programs in programs_by_channel.values():
+        programs.sort(
+            key=lambda p: p["start"] or min_utc
         )
 
     total_programs = sum(
         len(programs)
-        for programs in PROGRAMS_BY_CHANNEL.values()
+        for programs in programs_by_channel.values()
     )
+
+    # Commit only after the entire index has been built successfully.
+    CHANNELS_CACHE = channels_cache
+    CHANNEL_BY_ID = channel_by_id
+    ALIAS_TO_CHANNEL_IDS = alias_to_channel_ids
+    PROGRAMS_BY_CHANNEL = programs_by_channel
 
     print(
         f"EPG indexed: "
@@ -443,74 +382,44 @@ def build_epg_index(root):
     )
 
 
-# ============================================================
-# LOAD EPG
-# ============================================================
-
 def load_epg(force=False):
-
     global EPG_ROOT
     global EPG_LAST_UPDATE
 
-    now = datetime.now(
-        timezone.utc
-    )
+    now = datetime.now(timezone.utc)
 
     cache_valid = (
         EPG_ROOT is not None
         and EPG_LAST_UPDATE is not None
-        and (
-            now - EPG_LAST_UPDATE
-        ).total_seconds()
+        and (now - EPG_LAST_UPDATE).total_seconds()
         < EPG_CACHE_HOURS * 3600
     )
 
     if cache_valid and not force:
-
         return True
 
-    print(
-        "Downloading EPG..."
-    )
+    print("Downloading EPG...")
 
     try:
-
-        response = requests.get(
-            EPG_URL,
-            timeout=60
-        )
-
+        response = requests.get(EPG_URL, timeout=60)
         response.raise_for_status()
 
-        root = ET.fromstring(
-            response.content
-        )
+        root = ET.fromstring(response.content)
 
-        build_epg_index(
-            root
-        )
+        # Build the new index before replacing the current XML cache.
+        # If parsing/indexing fails, the previous cache remains intact.
+        build_epg_index(root)
 
         EPG_ROOT = root
-        EPG_LAST_UPDATE = now
+        EPG_LAST_UPDATE = datetime.now(timezone.utc)
 
-        print(
-            "EPG loaded successfully."
-        )
-
+        print("EPG loaded successfully.")
         return True
 
     except Exception as error:
-
-        print(
-            f"EPG loading error: {error}"
-        )
-
+        print(f"EPG loading error: {error}")
         return False
 
-
-# ============================================================
-# CHANNEL SEARCH
-# ============================================================
 
 def find_channels(search_text):
 
