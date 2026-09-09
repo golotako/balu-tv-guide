@@ -1180,15 +1180,15 @@ def get_prime_time_programs(
     )
 
     prime_start_israel = now_israel.replace(
-        hour=20,
-        minute=0,
+        hour=19,
+        minute=30,
         second=0,
         microsecond=0
     )
 
     prime_end_israel = (
         prime_start_israel
-        + timedelta(days=1)
+        + timedelta(hours=4, minutes=30)
     )
 
     prime_start_utc = (
@@ -1218,7 +1218,7 @@ def get_prime_time_programs(
         if start is None:
             continue
 
-        # Include every program that overlaps 20:00–00:00.
+        # Include every program that overlaps 19:30–00:00.
         if (
             start < prime_end_utc
             and (
@@ -1272,7 +1272,7 @@ def build_prime_time_screen(
         f"📺 <b>{channel_name}</b>\n"
         f"🌙 <b>פריים טיים</b>\n"
         f"{date_text}\n"
-        f"20:00–00:00\n\n"
+        f"19:30–23:59\n\n"
     )
 
     if not programs:
@@ -1312,7 +1312,7 @@ def build_prime_time_screen(
             f"📺 <b>{channel_name}</b>\n"
             f"🌙 <b>פריים טיים</b>\n"
             f"{date_text}\n"
-            f"20:00–00:00\n\n"
+            f"19:30–23:59\n\n"
         )
 
         schedule = ""
